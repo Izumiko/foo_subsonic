@@ -158,7 +158,15 @@ public:
 			DWORD maxConnections = 1;
 			if (!WinHttpSetOption(m_hSession, WINHTTP_OPTION_MAX_CONNS_PER_SERVER, &maxConnections, sizeof(maxConnections)))
 			{
-				return report_failure_debug("Error setting options");
+				return report_failure_debug("Error setting max connections per server");
+			}
+
+			// Enable SSL 3.0 and TLS 1.x in case the OS has other defaults set (e.g. Windows 7)
+			DWORD secureProtocols(WINHTTP_FLAG_SECURE_PROTOCOL_SSL3 | WINHTTP_FLAG_SECURE_PROTOCOL_TLS1 |
+				WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_1 | WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2);
+			if (!WinHttpSetOption(m_hSession, WINHTTP_OPTION_SECURE_PROTOCOLS, &secureProtocols, sizeof(secureProtocols)))
+			{
+				return report_failure_debug("Error enabling secure protocols");
 			}
 		}
 

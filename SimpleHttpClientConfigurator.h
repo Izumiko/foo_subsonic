@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdio.h>
+#include <random>
+#include <windows.h>
+#include <Wincrypt.h>
 #include "foo_subsonic.h"
 #include "simplehttpclient.h"
 #include "logindlg.h"
@@ -74,25 +78,6 @@ public:
 	}
 
 	/*
-	Turn string to hex representation.
-	*/
-	static std::string string_to_hex(const std::string& input)
-	{
-		static const char* const lut = "0123456789ABCDEF";
-		size_t len = input.length();
-
-		std::string output;
-		output.reserve(2 * len);
-		for (size_t i = 0; i < len; ++i)
-		{
-			const unsigned char c = input[i];
-			output.push_back(lut[c >> 4]);
-			output.push_back(lut[c & 15]);
-		}
-		return output;
-	}
-
-	/*
 	Encode a URL (which means mask all none ASCII characters).
 	*/
 	static pfc::string8 url_encode(const char *in) {
@@ -117,8 +102,62 @@ public:
 	}
 
 	/*
+	Generate a random alphanumeric string (salt) of length @length
+	*/
+	static std::string random_salt(size_t length)
+	{
+		auto randchar = []() -> char
+		{
+			const char charset[] =
+				"0123456789"
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+				"abcdefghijklmnopqrstuvwxyz";
+			const size_t max_index = (sizeof(charset) - 1);
+			return charset[rand() % max_index];
+		};
+		std::string str(length, 0);
+		std::generate_n(str.begin(), length, randchar);
+		return str;
+	}
+
+	/*
+	Generate the MD5 hash for a given @input string
+	*/
+	static std::string MD5(std::string input)
+	{
+		HCRYPTPROV CryptProv;
+		HCRYPTHASH CryptHash;
+		BYTE BytesHash[33];
+		DWORD dwHashLen;
+		std::string result;
+		
+		if (CryptAcquireContext(&CryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_MACHINE_KEYSET))
+		{
+			if (CryptCreateHash(CryptProv, CALG_MD5, 0, 0, &CryptHash))
+			{
+				if (CryptHashData(CryptHash, (BYTE*)input.c_str(), input.length(), 0))
+				{
+					if (CryptGetHashParam(CryptHash, HP_HASHVAL, BytesHash, &dwHashLen, 0))
+					{
+						result.clear();
+						std::string hexcharset = "0123456789abcdef";
+						for (int j = 0; j < 16; j++)
+						{
+							result += hexcharset.substr(((BytesHash[j] >> 4) & 0xF), 1);
+							result += hexcharset.substr(((BytesHash[j]) & 0x0F), 1);
+						}
+					}
+				}
+			}
+		}
+		CryptDestroyHash(CryptHash);
+		CryptReleaseContext(CryptProv, 0);
+		return result;
+	}
+
+	/*
 	Build the request URL required for subsonic.
-	This will build the URL using the configured server and add the required parameters like client (c), user (u) and password (p).
+	This will build the URL using the configured server and add the required parameters like client (c), user (u), salt (s) and auth token (t).
 	*/
 	static pfc::string8 buildRequestUrl(const char* restMethod, pfc::string8 urlparams) {
 
@@ -128,19 +167,19 @@ public:
 		}
 
 		std::string pass = Preferences::password_data.c_str();
-		if (Preferences::check_pass_as_hex_data.get_value()) {
-			pass = "enc:";
-			pass += string_to_hex(Preferences::password_data.c_str());
-		}
+		std::string salt = random_salt(12);
+		std::string token = MD5(pass + salt);
 
 		pfc::string8 url;
 		url << Preferences::connect_url_data;
 		url << "/rest/";
-		url << restMethod << ".view";
-		url << "?v=1.8.0";
+		url << restMethod;
+		url << ".view";
+		url << "?v=1.13.0";
 		url << "&c=" << COMPONENT_SHORT_NAME;
 		url << "&u=" << url_encode(Preferences::username_data);
-		url << "&p=" << pass.c_str();
+		url << "&s=" << salt.c_str();
+		url << "&t=" << token.c_str();
 
 		if (strlen(urlparams) > 0) {
 			url << "&" << urlparams;

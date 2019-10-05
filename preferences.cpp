@@ -16,9 +16,6 @@ namespace Preferences {
 	const GUID guid_check_selfsignedcerts_data = { 0x141b2ec3, 0x6b59, 0x49b3,{ 0xb7, 0xd7, 0x52, 0xcf, 0xb3, 0x8d, 0xe2, 0xc } };
 	cfg_bool check_selfsignedcerts_data(guid_check_selfsignedcerts_data, false);
 
-	const GUID guid_check_pass_as_hex_data = { 0x6f05d961, 0x344e, 0x49f3,{ 0x82, 0xf, 0x43, 0x58, 0x69, 0x80, 0xa0, 0xdb } };
-	cfg_bool check_pass_as_hex_data(guid_check_pass_as_hex_data, true);
-
 	const GUID guid_connect_timeout_data = { 0x5d359a74, 0x8010, 0x4fe0,{ 0xaf, 0x90, 0x45, 0x4, 0x9b, 0x1a, 0xb9, 0x84 } };
 	cfg_int connect_timeout_data(guid_connect_timeout_data, 10);
 
@@ -64,7 +61,6 @@ private:
 	CEdit coverart_size;
 
 	CCheckBox use_selfsignedcerts;
-	CCheckBox use_pass_as_hex;
 	CCheckBox use_coverart_dl;
 	CCheckBox use_coverart_resize;
 
@@ -119,8 +115,6 @@ public:
 		use_load_album_cache_on_startup = GetDlgItem(IDC_CHK_LOAD_ALBUM_CACHE_ONSTARTUP);
 		use_load_playlist_cache_on_startup = GetDlgItem(IDC_CHK_LOAD_PLAYLIST_CACHE_ONSTARTUP);
 
-		use_pass_as_hex = GetDlgItem(IDC_CHK_PASSWORD_AS_HASH);
-
 		proxy_url = GetDlgItem(IDC_PROXY_HOSTNAME_DATA);
 		connect_timeout = GetDlgItem(IDC_CONNECT_TIMEOUT_DATA);
 
@@ -146,7 +140,6 @@ public:
 		CheckDlgButton(IDC_RADIO_PROXY_CUSTOM, Preferences::proxy_settings_custom_data);
 
 		CheckDlgButton(IDC_CHECK_SELFSIGNED, Preferences::check_selfsignedcerts_data);
-		CheckDlgButton(IDC_CHK_PASSWORD_AS_HASH, Preferences::check_pass_as_hex_data);
 
 		CheckDlgButton(IDC_CHK_DLCOVERART, Preferences::coverart_download);
 		CheckDlgButton(IDC_CHK_RESIZECOVERART, Preferences::coverart_resize);
@@ -181,9 +174,6 @@ public:
 		
 		data = IsDlgButtonChecked(IDC_CHECK_SELFSIGNED) == BST_CHECKED;
 		if (Preferences::check_selfsignedcerts_data != data) return true;
-
-		data = IsDlgButtonChecked(IDC_CHK_PASSWORD_AS_HASH) == BST_CHECKED;
-		if (Preferences::check_pass_as_hex_data != data) return true;
 
 		data = IsDlgButtonChecked(IDC_RADIO_PROXY_CUSTOM) == BST_CHECKED;
 		if (Preferences::proxy_settings_custom_data != data) return true;
@@ -236,7 +226,6 @@ public:
 		uGetWindowText(coverart_size, tmp);
 		Preferences::coverart_size_data = atoi(tmp.c_str());
 		
-		Preferences::check_pass_as_hex_data = IsDlgButtonChecked(IDC_CHK_PASSWORD_AS_HASH) == BST_CHECKED;
 		Preferences::check_selfsignedcerts_data = IsDlgButtonChecked(IDC_CHECK_SELFSIGNED) == BST_CHECKED;
 
 		Preferences::proxy_settings_no_data = IsDlgButtonChecked(IDC_RADIO_PROXY_NO) == BST_CHECKED;

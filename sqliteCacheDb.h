@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sqlite3.h"
+#include "sqlite3\SQLiteCpp\SQLiteCpp.h"
 #include "foo_subsonic.h"
 #include "album.h"
 #include "playlist.h"

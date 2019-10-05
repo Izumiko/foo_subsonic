@@ -65,13 +65,13 @@ void SubsonicLibraryScanner::getAlbumList(threaded_process_status &p_status, int
 		return;
 	}
 
-	if (!connectAndGet(&doc, "getAlbumList", urlparms)) { // error occoured, we are done
+	if (!connectAndGet(&doc, "getAlbumList2", urlparms)) { // error occoured, we are done
 		return;
 	}
 
 	TiXmlElement* rootNode = doc.FirstChildElement("subsonic-response");
 	if (rootNode) {
-		TiXmlElement* firstChild = rootNode->FirstChildElement("albumList");
+		TiXmlElement* firstChild = rootNode->FirstChildElement("albumList2");
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 				unsigned int counter = 0;

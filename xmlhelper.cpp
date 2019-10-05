@@ -41,7 +41,7 @@ namespace XmlHelper {
 			return;
 		}
 		a->set_artist(XmlStrOrDefault(e, "artist", ""));
-		a->set_title(XmlStrOrDefault(e, "title", "")); // use title instead of album, otherwise multi disc albums were mixed
+		a->set_title(XmlStrOrDefault(e, "name", "")); // check what to do with multi disc albums
 
 		a->set_genre(XmlStrOrDefault(e, "genre", ""));
 		a->set_year(XmlStrOrDefault(e, "year", ""));
