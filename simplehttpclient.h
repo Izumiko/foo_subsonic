@@ -219,7 +219,7 @@ public:
 				pfc::string port = hostpartWithPort.subString(portpos + 1, hostpartWithPort.length()); // only the port (+1 to remove the colon)
 
 				int iport = std::stol(port.c_str());
-				if (port <= 65535 && port > 0) { // port is numeric and is in range (port_max = 65535, port_min = 1)
+				if (iport <= 65535 && iport > 0) { // port is numeric and is in range (port_max = 65535, port_min = 1)
 					simpleUrl->httpPort = iport;
 				}
 				else { // if port not in range, we ignore it
