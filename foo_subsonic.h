@@ -8,10 +8,11 @@
 
 #include "resource.h"
 #include "meta.h"
-#include "../SDK/foobar2000.h"
-#include "../tinyxml/tinyxml.h"
+#include "foobar2000/SDK/foobar2000.h"
+#include "tinyxml/tinyxml.h"
 #include "sqlite3/SQLiteCpp/SQLiteCpp.h"
-#include "../ATLHelpers/ATLHelpers.h"
+#include "foobar2000/helpers/foobar2000+atl.h"
+#include "foobar2000/helpers/BumpableElem.h"
 #include "Preferences.h"
 
 

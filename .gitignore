@@ -13,3 +13,6 @@ sqlite3/*.c
 sqlite3/*.cpp
 sqlite3/*.h
 sqlite3/SQLiteCpp/*.h
+build/
+.idea/
+cmake-*

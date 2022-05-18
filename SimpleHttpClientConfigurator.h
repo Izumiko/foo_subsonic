@@ -84,7 +84,7 @@ public:
 		pfc::string8 out;
 		out.prealloc(strlen(in) * 3 + 1);
 
-		for (register const char *tmp = in; *tmp != '\0'; tmp++) {
+		for (const char *tmp = in; *tmp != '\0'; tmp++) {
 			auto c = static_cast<unsigned char>(*tmp);
 			if (isalnum(c)) {
 				out.add_char(c);

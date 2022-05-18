@@ -1,0 +1,7 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+!sqlite3.vcxproj
+!sqlite3.vcxproj.filters
+!sqlite3.vcxproj.user

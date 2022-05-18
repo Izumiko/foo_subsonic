@@ -13,21 +13,43 @@ All used libraries and the foobar SDK are licensed under different license agree
 Please look at the specific project for further details.
 
 ## Requirements:
-* [WTL 9.x](http://wtl.sourceforge.net/) (I used 9.0) 
+* [WTL 10.x](http://wtl.sourceforge.net/)
 * [TinyXML](http://sourceforge.net/projects/tinyxml/)
 * [SQLite3 amalgamation source](https://www.sqlite.org/download.html)
 * [SQLiteCPP](https://github.com/SRombauts/SQLiteCpp)
-* [Foobar2000 SDK](http://www.foobar2000.org/SDK) (I used 2015-01-14, but newer versions should also be fine)
-* MS Visual Studio (at least version 2010, I use 2015 Community Edition)
+* [Foobar2000 SDK](http://www.foobar2000.org/SDK) (I used 2022-01-04, but newer versions should also be fine)
+* MS Visual Studio (at least version 2010, I use 2022 Community Edition, 2022 SDK is for VS2019)
 
 ## Build Setup
-1. Extract Foobar2000 SDK
-2. Clone or extract foo_subsonic source into the the same folder as foobar2000 SDK (so foo_subsonic directory is in the same path as foo_sample)
-3. Extract TinyXML source in the same directory as foo_subsonic source
-4. Extract SQLite3 amalgamation source to foo_subsonic/sqlite3
-5. Extract SQLiteCPP and copy the *.cpp files to foo_subsonic/sqlite3. Then copy the files from includes/SQLiteCPP/*.h to foo_subsonic/sqlite3/SQLiteCPP
+1. Extract Foobar2000 SDK to SDK folder
+2. Extract TinyXML source to SDK folder
+3. Extract WTL's Include folder to SDK/wtl/ folder
+4. Extract SQLite3 amalgamation source to SDK/sqlite3
+5. Extract SQLiteCPP and copy the *.cpp files to SDK/sqlite3. Then copy the files from includes/SQLiteCPP/*.h to SDK/sqlite3/SQLiteCPP
 6. Start Visual Studio and open the foo_subsonic.sln
+7. Right click the solution in VS and Retarget solution, set target of all projects to your current VS and SDK
+8. Add IncludePath `../../wtl/Include` to foobar2000_sdk_helpers; add IncludePath `../wtl/Include` to libPPUI
 
+Directory structure:
+```
+foo_subsonic/
+    SDK/
+        foobar2000/
+        libPPUI
+        pfc/
+        sqlite3/
+            SQLiteCPP/
+        tinyxml/
+        wtl/
+            Include/
+```
+
+Alternative build setup:
+1. Extract files as Steps 1-5 above
+2. Open cmd at project folder
+3. `cmake -A Win32 -B build -S .`
+4. `cmake --build build --config Release`
+5. The plugin is now in `build/Release/foo_subsonic.dll`
 
 ## Help
 Usage and FAQ can be found in the [Wiki](https://github.com/hypfvieh/foo_subsonic/wiki)
