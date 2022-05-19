@@ -4,7 +4,7 @@
 
 class playlistUpdater : public process_locations_notify {
 public:
-	void on_completion(const pfc::list_base_const_t<metadb_handle_ptr> & p_items)
+	void on_completion(const pfc::list_base_const_t<metadb_handle_ptr> & p_items) override
 	{
 		for (unsigned int i = 0; i < p_items.get_count(); i++) {
 			metadb_handle_ptr item = p_items.get_item(i);
@@ -20,9 +20,9 @@ public:
 
 				int duration = atoi(t.get_duration());
 				int bitrate = atoi(t.get_bitrate());
-
-				uDebugLog() << "Artist: " << t.get_artist() << " - Album: " << t.get_album() << " - Title: " << t.get_title();
-
+#ifdef _DEBUG
+                FB2K_DebugLog() << "Artist: " << t.get_artist() << " - Album: " << t.get_album() << " - Title: " << t.get_title();
+#endif
 				f_info.meta_set("Artist", t.get_artist());
 				f_info.meta_set("Album", t.get_album());
 				f_info.meta_set("Title", t.get_title());
@@ -46,7 +46,7 @@ public:
 
 	};
 
-	void on_aborted() { };
+	void on_aborted() override { };
 };
 
 service_ptr_t<playlistUpdater> p_notify = new service_impl_t<playlistUpdater>();

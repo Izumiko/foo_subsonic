@@ -1,5 +1,7 @@
 #include "foo_subsonic.h"
 #include "ui.h"
+
+#include <utility>
 #include "subsoniclibraryscanner.h"
 #include "albumQueryThread.h"
 #include "playlistQueryThread.h"
@@ -12,7 +14,7 @@
 
 using namespace foo_subsonic;
 
-CSubsonicUi::CSubsonicUi(ui_element_config::ptr config, ui_element_instance_callback_ptr p_callback) : m_callback(p_callback), m_config(config) {
+CSubsonicUi::CSubsonicUi(ui_element_config::ptr config, ui_element_instance_callback_ptr p_callback) : m_callback(std::move(p_callback)), m_config(std::move(config)) {
 	AtlInitCommonControls(ICC_TREEVIEW_CLASSES);
 }
 
@@ -61,14 +63,14 @@ LRESULT CSubsonicUi::OnContextMenu(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
 	LRESULT lRet = DefWindowProc(uMsg, wParam, lParam);
 	HMENU hMenu = ::CreatePopupMenu();
 
-	if (NULL != hMenu) {
+	if (nullptr != hMenu) {
 
 		HTREEITEM selected = GetSelectedItem();
 
-		if ((selected != NULL)) {
+		if ((selected != nullptr)) {
 			DWORD_PTR ptr = GetItemData(selected);
 			if (ptr != NULL) {
-				CoreEntity* coreType = reinterpret_cast<CoreEntity*>(ptr);
+				auto* coreType = reinterpret_cast<CoreEntity*>(ptr);
 				if (coreType->get_type() == ENTRY_TYPE_ARTIST) { // Artist
 					::AppendMenu(hMenu, MF_STRING, ID_CONTEXT_UPDATEARTIST, _T("Update selected Artist"));
 					::AppendMenu(hMenu, MF_SEPARATOR, ID_CONTEXT_NOTHING, _T(""));
@@ -89,12 +91,12 @@ LRESULT CSubsonicUi::OnContextMenu(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
 		CPoint p = CPoint(xPos, yPos);
 		ClientToScreen(&p);
 
-		int sel = ::TrackPopupMenuEx(hMenu,
-			TPM_CENTERALIGN | TPM_RIGHTBUTTON,
-			p.x,
-			p.y,
-			m_hWnd,
-			NULL);
+        ::TrackPopupMenuEx(hMenu,
+                           TPM_CENTERALIGN | TPM_RIGHTBUTTON,
+                           p.x,
+                           p.y,
+                           m_hWnd,
+                           nullptr);
 		::DestroyMenu(hMenu);
 
 	}
@@ -104,71 +106,66 @@ LRESULT CSubsonicUi::OnContextMenu(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
 LRESULT CSubsonicUi::OnLButtonDblClick(UINT, WPARAM, LPARAM, BOOL&) {
 	HTREEITEM selected = GetSelectedItem();
 
-	if ((selected != NULL)) {
+	if ((selected != nullptr)) {
 		DWORD_PTR ptr = GetItemData(selected);
 		if (ptr == NULL) {
 			return 0;
 		}
-		CoreEntity* coreType = reinterpret_cast<CoreEntity*>(ptr);
+		auto* coreType = reinterpret_cast<CoreEntity*>(ptr);
 
 		if (coreType->get_type() == ENTRY_TYPE_TRACK) { // Track
-			
 
-			if (ptr != NULL) {
-				Track* track = reinterpret_cast<Track*>(ptr);
-
-				uDebugLog() << "Got Track=" << track->get_title() << ", Artist=" << track->get_artist();
-
-				const char* url = track->get_streamUrl().c_str();
-				console::printf("Adding URL: %s", track->get_streamUrl());
-				static_api_ptr_t<playlist_incoming_item_filter_v2>()->process_locations_async(
-					pfc::list_single_ref_t<const char*>(url),
-					playlist_incoming_item_filter_v2::op_flag_background,
-					NULL,
-					NULL,
-					m_hWnd,
-					p_notify
-					);
-			}
+            auto* track = reinterpret_cast<Track*>(ptr);
+#ifdef _DEBUG
+            FB2K_DebugLog() << "Got Track=" << track->get_title() << ", Artist=" << track->get_artist();
+#endif
+            const char* url = track->get_streamUrl().c_str();
+            console::printf("Adding URL: %s", track->get_streamUrl().c_str());
+            static_api_ptr_t<playlist_incoming_item_filter_v2>()->process_locations_async(
+                pfc::list_single_ref_t<const char*>(url),
+                playlist_incoming_item_filter_v2::op_flag_background,
+                nullptr,
+                nullptr,
+                m_hWnd,
+                p_notify
+                );
 
 		}
 		else { // Album or Playlist
-			if (ptr != NULL) {
-				std::list<Track*>* trackList;
-				if (coreType->get_type() == ENTRY_TYPE_ALBUM) {
-					Album* album = reinterpret_cast<Album*>(ptr);
+            std::list<Track*>* trackList;
+            if (coreType->get_type() == ENTRY_TYPE_ALBUM) {
+                auto* album = reinterpret_cast<Album*>(ptr);
 
-					console::formatter() << "Got Album=" << album->get_title() << ", Artist=" << album->get_artist();
+                FB2K_console_formatter() << "Got Album=" << album->get_title() << ", Artist=" << album->get_artist();
 
-					trackList = album->getTracks();
+                trackList = album->getTracks();
 
-				}
-				else if (coreType->get_type() == ENTRY_TYPE_PLAYLIST) {
-					Playlist* playlist = reinterpret_cast<Playlist*>(ptr);
-					console::formatter() << "Got Playlist=" << playlist->get_name() << ", Entries=" << playlist->getTracks()->size();
-					trackList = playlist->getTracks();
-				}
-				else {
-					return 0;
-				}
+            }
+            else if (coreType->get_type() == ENTRY_TYPE_PLAYLIST) {
+                auto* playlist = reinterpret_cast<Playlist*>(ptr);
+                FB2K_console_formatter() << "Got Playlist=" << playlist->get_name() << ", Entries=" << playlist->getTracks()->size();
+                trackList = playlist->getTracks();
+            }
+            else {
+                return 0;
+            }
 
-				if (trackList->size() > 0) {
-					std::list<Track*>::iterator trackIterator;
-					pfc::list_t<const char*> data;
-					for (trackIterator = trackList->begin(); trackIterator != trackList->end(); trackIterator++) {						
-						data.add_item((*trackIterator)->get_streamUrl());
-					}
+            if (!trackList->empty()) {
+                std::list<Track*>::iterator trackIterator;
+                pfc::list_t<const char*> data;
+                for (trackIterator = trackList->begin(); trackIterator != trackList->end(); trackIterator++) {
+                    data.add_item((*trackIterator)->get_streamUrl());
+                }
 
-					static_api_ptr_t<playlist_incoming_item_filter_v2>()->process_locations_async(
-						data,
-						playlist_incoming_item_filter_v2::op_flag_background,
-						NULL,
-						NULL,
-						m_hWnd,
-						p_notify
-						);
-				}
-			}
+                static_api_ptr_t<playlist_incoming_item_filter_v2>()->process_locations_async(
+                    data,
+                    playlist_incoming_item_filter_v2::op_flag_background,
+                    nullptr,
+                    nullptr,
+                    m_hWnd,
+                    p_notify
+                    );
+            }
 		}
 	}
 	
@@ -203,12 +200,12 @@ LRESULT CSubsonicUi::OnContextArtistUpdate(WORD /*wNotifyCode*/, WORD /*wID*/, H
 	if (result == IDYES) {
 		HTREEITEM selected = GetSelectedItem();
 
-		if ((selected != NULL)) {
+		if ((selected != nullptr)) {
 			DWORD_PTR ptr = GetItemData(selected);
 			if (ptr == NULL) {
 				return 0;
 			}
-			CoreEntity* coreType = reinterpret_cast<CoreEntity*>(ptr);
+			auto* coreType = reinterpret_cast<CoreEntity*>(ptr);
 			if (coreType->get_type() == ENTRY_TYPE_ARTIST) { // Artist
 				
 				if (!coreType->get_id().is_empty()) {
@@ -264,17 +261,17 @@ void CSubsonicUi::addTracksToTreeNode(std::list<Track*>* trackList, HTREEITEM al
 		Track* store = *trackIterator;
 		HTREEITEM titleNode = InsertItem(track, albumNode, TVI_LAST);
 
-		SetItemData(titleNode, (DWORD_PTR)store); // attach track meta data to node, so we can use this as shortcut for adding tracks to playlist
+		SetItemData(titleNode, (DWORD_PTR)store); // attach track metadata to node, so we can use this as shortcut for adding tracks to playlist
 	}
 }
 
 void CSubsonicUi::populateTreeWithAlbums(std::list<Album>* albumList) {
 	std::list<Album>::iterator it;
 
-	if (rootNodes[TREE_ROOT_CATALOG] != NULL) {
-		CTreeViewCtrlEx::DeleteItem(rootNodes[TREE_ROOT_CATALOG]);  // remove old catalog node and all childs
+	if (rootNodes[TREE_ROOT_CATALOG] != nullptr) {
+		CTreeViewCtrlEx::DeleteItem(rootNodes[TREE_ROOT_CATALOG]);  // remove old catalog node and all children
 	}
-	rootNodes[TREE_ROOT_CATALOG] = CTreeViewCtrlEx::InsertItem(L"Remote Catalog", NULL, TVI_ROOT); // create new catalog node
+	rootNodes[TREE_ROOT_CATALOG] = CTreeViewCtrlEx::InsertItem(L"Remote Catalog", nullptr, TVI_ROOT); // create new catalog node
 	std::wstring alpha = _T("#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	for (unsigned int i = 0; i < alpha.length(); i++) {
 		wchar_t name[2] = { alpha[i] ,'\0' };
@@ -317,7 +314,7 @@ void CSubsonicUi::populateTreeWithAlbums(std::list<Album>* albumList) {
 			HTREEITEM artistRoot = InsertItem(artistName, rootNode, TVI_LAST); // add artist as new entry
 			HTREEITEM albumNode = InsertItem(albumName, artistRoot, TVI_LAST); // add the current album as entry to artist
 			
-			Artist *artist = new Artist(it->get_artistid());
+			auto *artist = new Artist(it->get_artistid());
 			SetItemData(artistRoot, (DWORD_PTR)artist); // attach artist details
 
 			std::list<Track*>* trackList = it->getTracks();
@@ -333,10 +330,10 @@ void CSubsonicUi::populateTreeWithAlbums(std::list<Album>* albumList) {
 void CSubsonicUi::populateTreeWithPlaylists(std::list<Playlist>* playlists) {
 	std::list<Playlist>::iterator it;
 
-	if (rootNodes[TREE_ROOT_PLAYLISTS] != NULL) {
+	if (rootNodes[TREE_ROOT_PLAYLISTS] != nullptr) {
 		CTreeViewCtrlEx::DeleteItem(rootNodes[TREE_ROOT_PLAYLISTS]);  // remove old playlists node and all childs
 	}
-	rootNodes[TREE_ROOT_PLAYLISTS] = CTreeViewCtrlEx::InsertItem(L"Remote Playlists", NULL, TVI_ROOT); // create playlist node
+	rootNodes[TREE_ROOT_PLAYLISTS] = CTreeViewCtrlEx::InsertItem(L"Remote Playlists", nullptr, TVI_ROOT); // create playlist node
 
 	for (it = playlists->begin(); it != playlists->end(); it++) {
 
@@ -417,14 +414,12 @@ LRESULT CSubsonicUi::OnBeginDrag(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 		if (selected) {
 			m_dragging = true;
 
-			
-
 			POINT pt = { 0 };
-			m_dragImage = &CTreeViewCtrlEx::CreateDragImage(selected);
-			m_dragImage->BeginDrag(0, 0, 0);
+			auto m_dragImage = CTreeViewCtrlEx::CreateDragImage(selected);
+			m_dragImage.BeginDrag(0, 0, 0);
 
 			::ClientToScreen(m_hWnd, &pt);
-			m_dragImage->DragEnter(NULL, pt);
+			WTL::CImageList::DragEnter(nullptr, pt);
 
 			SetCapture();
 			return 0;

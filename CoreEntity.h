@@ -11,8 +11,8 @@ class CoreEntity {
 	STRING_MEMBER(id)
     MEMBER(int, type)
 public:
-	CoreEntity(int _type) {
+	explicit CoreEntity(int _type) {
 		type = _type;
 	};
-	~CoreEntity() {};
+	~CoreEntity() = default;;
 };

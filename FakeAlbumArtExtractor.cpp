@@ -8,7 +8,7 @@ const GUID FakeAlbumArtExtractor::class_guid = { 0xe1b99b8c, 0x518a, 0x4ea3,{ 0x
 
 pfc::string8 FakeAlbumArtExtractor::extractPathId(const char* p_path) {
 
-	if (p_path == NULL) {
+	if (p_path == nullptr) {
 		return "";
 	}
 
@@ -42,23 +42,27 @@ pfc::string8 FakeAlbumArtExtractor::extractPathId(const char* p_path) {
 
 	std::string itempath = p_path;
 	if (std::regex_search(itempath, match, re)) { // matches
-		uDebugLog() << "Found matching URL: " << itempath.c_str();		
+#ifdef _DEBUG
+		FB2K_DebugLog() << "Found matching URL: " << itempath.c_str();
+#endif
 		if (match.size() >= 5) {
-			uDebugLog() << "id: " << match.str(5).c_str();
+#ifdef _DEBUG
+			FB2K_DebugLog() << "id: " << match.str(5).c_str();
+#endif
 			return match.str(5).c_str();
 		}
-	}	
+	}
 	return "";
 }
 
 album_art_extractor_instance_v2::ptr FakeAlbumArtExtractor::open_v2(file_ptr p_filehint, const char *p_path, abort_callback &p_abort) {
-	
-	char* buffer = NULL;
+
+	char* buffer = nullptr;
 	size_t buffSize = 0;
 
 	pfc::string8 trackId = extractPathId(p_path);
-	
-	if (trackId == NULL) {
+
+	if (trackId == nullptr) {
 		throw exception_album_art_not_found();
 	}
 
@@ -91,7 +95,7 @@ album_art_extractor_instance_v2::ptr FakeAlbumArtExtractor::open_v2(file_ptr p_f
 		throw exception_album_art_not_found();
 	}
 
-	service_impl_t<HttpAlbumArtExtractorInstance>* inst = new service_impl_t<HttpAlbumArtExtractorInstance>();
+	auto* inst = new service_impl_t<HttpAlbumArtExtractorInstance>();
 
 	album_art_data_ptr data = album_art_data_impl::g_create(buffer, buffSize);
 
@@ -102,6 +106,6 @@ album_art_extractor_instance_v2::ptr FakeAlbumArtExtractor::open_v2(file_ptr p_f
 
 
 bool FakeAlbumArtExtractor::is_our_path(const char * p_path, const char * p_extension) {
-	pfc::string8 match = extractPathId(p_path);	
+	pfc::string8 match = extractPathId(p_path);
 	return (!match.is_empty());
 }

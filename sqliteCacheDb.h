@@ -18,7 +18,7 @@ const std::string SQL_VERSION_INFO = "INSERT OR REPLACE INTO metainfo (infokey, 
 class SqliteCacheDb {
 
 private:
-	SQLite::Database *db = NULL;
+	SQLite::Database *db = nullptr;
 
 	std::list<Album> albumlist;
 	std::list<Playlist> playlists;
@@ -37,7 +37,7 @@ private:
 
 	void addToUrlMap(Track* t);
 
-	void SqliteCacheDb::parseTrackInfo(Track *t, SQLite::Statement *query_track);
+	void parseTrackInfo(Track *t, SQLite::Statement *query_track);
 
 	const char* sql_table_create[SQL_TABLE_CREATE_SIZE] = {
 		"CREATE TABLE IF NOT EXISTS metainfo (infokey TEXT PRIMARY KEY, infovalue TEXT)",
@@ -57,7 +57,7 @@ private:
 		"CREATE INDEX IF NOT EXISTS playlist_id_index ON playlists(id)"
 	};
 	
-	bool isInteger(const std::string & s)
+	static bool isInteger(const std::string & s)
 	{
 		if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false;
 
@@ -67,12 +67,12 @@ private:
 		return (*p == 0);
 	}
 
-	std::wstring s2ws(const std::string& s)
+	static std::wstring s2ws(const std::string& s)
 	{
 		int len;
 		int slength = (int)s.length() + 1;
-		len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-		wchar_t* buf = new wchar_t[len];
+		len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, nullptr, 0);
+		auto* buf = new wchar_t[len];
 		MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
 		std::wstring r(buf);
 		delete[] buf;
@@ -85,7 +85,7 @@ private:
 public:
 
 	static SqliteCacheDb* getInstance() {
-		if (instance == NULL) {
+		if (instance == nullptr) {
 			instance = new SqliteCacheDb();
 		}
 		return instance;
@@ -114,5 +114,5 @@ public:
 
 	void reloadCache();
 
-	void checkMetaInfo();
+    [[maybe_unused]] [[maybe_unused]] void checkMetaInfo();
 };

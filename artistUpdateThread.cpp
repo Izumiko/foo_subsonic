@@ -2,12 +2,14 @@
 #include "subsoniclibraryscanner.h"
 #include "artistUpdateThread.h"
 
+#include <utility>
+
 using namespace foo_subsonic;
 
 ArtistUpdateThread::ArtistUpdateThread(SubsonicLibraryScanner *scanner, HWND window, pfc::string8 _artistId)
 	: scanner(scanner),
 	window(window),
-	artistId(_artistId) {}
+	artistId(std::move(_artistId)) {}
 
 
 void ArtistUpdateThread::run(threaded_process_status &p_status, abort_callback &p_abort) {

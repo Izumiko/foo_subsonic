@@ -8,8 +8,6 @@
 #include "sqliteCacheDb.h"
 #include "SimpleHttpClientConfigurator.h"
 
-#include <winhttp.h>
-
 using namespace foo_subsonic; 
 using namespace XmlHelper;
 
@@ -22,21 +20,23 @@ BOOL SubsonicLibraryScanner::connectAndGet(TiXmlDocument* doc, const char* restM
 		return FALSE;
 	}
 	pfc::string8 url = SimpleHttpClientConfigurator::buildRequestUrl(restMethod, urlparams);
-	uDebugLog() << "connectAndGet->URL: " << url;
+#ifdef _DEBUG
+	FB2K_DebugLog() << "connectAndGet->URL: " << url;
+#endif
 	SimpleHttpClientConfig cliConfig;
 
 	if (SimpleHttpClientConfigurator::createSimpleHttpClientConfigFromPreferences(cliConfig)) {
 
 		SimpleHttpClient cli = SimpleHttpClient(cliConfig);
 
-		char* buffer = NULL;
+		char* buffer = nullptr;
 		size_t buffSize = 0;
 
 		cli.open(url.c_str());
 		cli.send_request(buffer, buffSize);	
 		
 		// Parse	
-		doc->Parse(buffer, 0, TIXML_ENCODING_UTF8);
+		doc->Parse(buffer, nullptr, TIXML_ENCODING_UTF8);
 		return checkForError(doc);
 	}
 	else {
@@ -75,7 +75,7 @@ void SubsonicLibraryScanner::getAlbumList(threaded_process_status &p_status, int
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 				unsigned int counter = 0;
-				for (TiXmlElement* e = firstChild->FirstChildElement("album"); e != NULL; e = e->NextSiblingElement("album")) {
+				for (TiXmlElement* e = firstChild->FirstChildElement("album"); e != nullptr; e = e->NextSiblingElement("album")) {
 					Album a;
 
 					parseAlbumInfo(e, &a);
@@ -148,8 +148,8 @@ void SubsonicLibraryScanner::getAlbumTracks(Album *album, abort_callback &p_abor
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 				
-				for (TiXmlElement* e = firstChild->FirstChildElement("song"); e != NULL; e = e->NextSiblingElement("song")) {
-					Track* t = new Track();					
+				for (TiXmlElement* e = firstChild->FirstChildElement("song"); e != nullptr; e = e->NextSiblingElement("song")) {
+					auto* t = new Track();
 					parseTrackInfo(e, t);
 					if (p_abort.is_aborting()) {
 						console::print("Album Track retrieval aborted: Stop loop");
@@ -184,22 +184,28 @@ void SubsonicLibraryScanner::getAlbumAndTracksByArtistId(const char *artist_id, 
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 
-				for (TiXmlElement* e = firstChild->FirstChildElement("album"); e != NULL; e = e->NextSiblingElement("album")) {
+				for (TiXmlElement* e = firstChild->FirstChildElement("album"); e != nullptr; e = e->NextSiblingElement("album")) {
 					
 					Album a;
-					uDebugLog() << "Updating AlbumID: " << XmlStrOrDefault(e, "id", "unknown_error");
+#ifdef _DEBUG
+					FB2K_DebugLog() << "Updating AlbumID: " << XmlStrOrDefault(e, "id", "unknown_error");
+#endif
 					SqliteCacheDb::getInstance()->getAlbumById(XmlStrOrDefault(e, "id", "unknown_error"), a);
 
 					// check if this is a new album
 					if (a.get_id().is_empty()) { // albumId is empty, if cache did not find any stored entry						
-						parseAlbumInfo(e, &a);						
-						uDebugLog() << "Adding new album: " << a.get_title();
+						parseAlbumInfo(e, &a);
+#ifdef _DEBUG
+						FB2K_DebugLog() << "Adding new album: " << a.get_title();
+#endif
 						getAlbumTracks(&a, p_abort); // add the new tracks
 						SqliteCacheDb::getInstance()->addAlbum(a); // add the new album to cache
 					}
 					else {
 						a.getTracks()->clear(); // remove previously stored tracks
-						uDebugLog() << "Updating album: " << a.get_title();
+#ifdef _DEBUG
+						FB2K_DebugLog() << "Updating album: " << a.get_title();
+#endif
 						getAlbumTracks(&a, p_abort); // add the new tracks
 					}
 				}
@@ -233,7 +239,7 @@ void SubsonicLibraryScanner::getPlaylists(threaded_process_status &p_status, abo
 		TiXmlElement* firstChild = rootNode->FirstChildElement("playlists");
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
-				for (TiXmlElement* e = firstChild->FirstChildElement("playlist"); e != NULL; e = e->NextSiblingElement("playlist")) {
+				for (TiXmlElement* e = firstChild->FirstChildElement("playlist"); e != nullptr; e = e->NextSiblingElement("playlist")) {
 					Playlist p;
 					p.set_comment(XmlStrOrDefault(e, "comment", ""));
 					p.set_coverArt(XmlStrOrDefault(e, "covertArt", ""));
@@ -288,8 +294,8 @@ void SubsonicLibraryScanner::getPlaylistEntries(Playlist *playlist, abort_callba
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 
-				for (TiXmlElement* e = firstChild->FirstChildElement("entry"); e != NULL; e = e->NextSiblingElement("entry")) {
-					Track* t = new Track();
+				for (TiXmlElement* e = firstChild->FirstChildElement("entry"); e != nullptr; e = e->NextSiblingElement("entry")) {
+					auto* t = new Track();
 					parseTrackInfo(e, t);
 					playlist->addTrack(t);
 					if (p_abort.is_aborting()) {
@@ -320,8 +326,8 @@ void SubsonicLibraryScanner::getSearchResults(const char* urlParams) {
 		if (firstChild) {
 			if (!firstChild->NoChildren()) { // list is not empty
 
-				for (TiXmlElement* e = firstChild->FirstChildElement("song"); e != NULL; e = e->NextSiblingElement("song")) {
-					Track* t = new Track();
+				for (TiXmlElement* e = firstChild->FirstChildElement("song"); e != nullptr; e = e->NextSiblingElement("song")) {
+					auto* t = new Track();
 					parseTrackInfo(e, t);
 					SqliteCacheDb::getInstance()->addSearchResult(t);
 				}
@@ -357,7 +363,7 @@ bool SubsonicLibraryScanner::checkForError(TiXmlDocument* xml) {
 			tmp += errorMsg;
 
 			size_t strSize = tmp.size() + 1;
-			wchar_t* wChar = new wchar_t[strSize];
+			auto* wChar = new wchar_t[strSize];
 
 			size_t outSize;
 			mbstowcs_s(&outSize, wChar, strSize, tmp.c_str(), strSize - 1);

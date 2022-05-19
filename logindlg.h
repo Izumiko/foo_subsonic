@@ -8,7 +8,7 @@ private:
 	CEdit txt_password;
 public:
 
-	enum { IDD = IDD_PASSWORD_DLG };
+	enum { IDD [[maybe_unused]] = IDD_PASSWORD_DLG };
 
 	BEGIN_MSG_MAP(LoginDialog)
 		COMMAND_ID_HANDLER_EX(IDOK, OnOk)
@@ -18,8 +18,7 @@ public:
 		MSG_WM_SHOWWINDOW(OnShow)
 	END_MSG_MAP()
 	
-	LoginDialog() {
-	}
+	LoginDialog() = default;
 
 	void OnClose() {
 		DestroyWindow();

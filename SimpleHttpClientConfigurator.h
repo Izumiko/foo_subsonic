@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdio.h>
 #include <random>
 #include <windows.h>
 #include <Wincrypt.h>
@@ -106,14 +105,18 @@ public:
 	*/
 	static std::string random_salt(size_t length)
 	{
-		auto randchar = []() -> char
+        std::random_device r;
+        std::default_random_engine e1(r());
+
+		auto randchar = [&e1]() -> char
 		{
 			const char charset[] =
 				"0123456789"
 				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"abcdefghijklmnopqrstuvwxyz";
 			const size_t max_index = (sizeof(charset) - 1);
-			return charset[rand() % max_index];
+            std::uniform_int_distribution<int> uniform_dist(0, max_index - 1);
+			return charset[uniform_dist(e1)];
 		};
 		std::string str(length, 0);
 		std::generate_n(str.begin(), length, randchar);
@@ -123,7 +126,7 @@ public:
 	/*
 	Generate the MD5 hash for a given @input string
 	*/
-	static std::string MD5(std::string input)
+	static std::string MD5(const std::string& input)
 	{
 		HCRYPTPROV CryptProv;
 		HCRYPTHASH CryptHash;
@@ -131,7 +134,7 @@ public:
 		DWORD dwHashLen;
 		std::string result;
 		
-		if (CryptAcquireContext(&CryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_MACHINE_KEYSET))
+		if (CryptAcquireContext(&CryptProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_MACHINE_KEYSET))
 		{
 			if (CryptCreateHash(CryptProv, CALG_MD5, 0, 0, &CryptHash))
 			{
@@ -148,10 +151,11 @@ public:
 						}
 					}
 				}
+                CryptDestroyHash(CryptHash);
 			}
+            CryptReleaseContext(CryptProv, 0);
 		}
-		CryptDestroyHash(CryptHash);
-		CryptReleaseContext(CryptProv, 0);
+
 		return result;
 	}
 
@@ -159,10 +163,10 @@ public:
 	Build the request URL required for subsonic.
 	This will build the URL using the configured server and add the required parameters like client (c), user (u), salt (s) and auth token (t).
 	*/
-	static pfc::string8 buildRequestUrl(const char* restMethod, pfc::string8 urlparams) {
+	static pfc::string8 buildRequestUrl(const char* restMethod, const pfc::string8& urlparams) {
 
 		if (Preferences::password_data.is_empty() || Preferences::username_data.is_empty()) {
-			LoginDialog *dlg = new LoginDialog();
+			auto *dlg = new LoginDialog();
 			dlg->DoModal(core_api::get_main_window(), LPARAM(0));
 		}
 

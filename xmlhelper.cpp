@@ -8,28 +8,28 @@
 
 namespace XmlHelper {
 
-	int XmlIntOrDefault(TiXmlElement* element, const char* attribute, unsigned int default) {
-		auto temp = default;
+	int XmlIntOrDefault(TiXmlElement* element, const char* attribute, unsigned int defaultval) {
+		auto temp = defaultval;
 		if (element->QueryUnsignedAttribute(attribute, &temp) == TIXML_SUCCESS) {
 			return temp;
 		}
 		else {
-			return default;
+			return defaultval;
 		}
 	}
 	
-	pfc::string8 XmlStrOrDefault(TiXmlElement* element, const char* attribute, const char* default) {
+	pfc::string8 XmlStrOrDefault(TiXmlElement* element, const char* attribute, const char* defaultval) {
 		auto tmp = element->Attribute(attribute);
-		return tmp == nullptr ? "" : tmp;
+		return tmp == nullptr ? defaultval : tmp;
 	}
 
-	bool XmlBoolOrDefault(TiXmlElement* element, const char* attribute, bool default) {
-		auto temp = default;
+	bool XmlBoolOrDefault(TiXmlElement* element, const char* attribute, bool defaultval) {
+		auto temp = defaultval;
 		if (element->QueryBoolAttribute(attribute, &temp) == TIXML_SUCCESS) {
 			return temp;
 		}
 		else {
-			return default;
+			return defaultval;
 		}
 	}
 
@@ -90,7 +90,7 @@ namespace XmlHelper {
 		t->set_streamUrl(streamUrl);
 	}
 
-	void parsePlaylistInfo(TiXmlElement* e, Playlist* p) {
+    [[maybe_unused]] void parsePlaylistInfo(TiXmlElement* e, Playlist* p) {
 		if (e == nullptr) {
 			return;
 		}

@@ -60,7 +60,7 @@ private:
 	CEdit connect_timeout;
 	CEdit coverart_size;
 
-	CCheckBox use_selfsignedcerts;
+    [[maybe_unused]] CCheckBox use_selfsignedcerts;
 	CCheckBox use_coverart_dl;
 	CCheckBox use_coverart_resize;
 
@@ -74,7 +74,7 @@ private:
 	preferences_page_callback::ptr on_change_callback;
 
 public:
-	PreferencesPageInstance(preferences_page_callback::ptr callback) : on_change_callback(callback)
+	explicit PreferencesPageInstance(preferences_page_callback::ptr callback) : on_change_callback(callback)
 	{}
 
 	enum { IDD = IDD_PREFERENCES };
@@ -200,19 +200,19 @@ public:
 	}
 
 	bool checkProxyPrefix(pfc::string8 proxyHost) {
-		pfc::string workstr = proxyHost;
+		pfc::string workstr = std::move(proxyHost);
 
 		workstr = workstr.toLower();
 		return workstr.startsWith("http://") || workstr.startsWith("https://") || workstr.startsWith("socks://") || workstr.startsWith("socks5://");
 	}
 
-	t_uint32 get_state() {
+	t_uint32 get_state() override {
 		t_uint32 state = preferences_state::resettable;
 		if (has_changed()) state |= preferences_state::changed;
 		return state;
 	}
 
-	void apply() {
+	void apply() override {
 		uGetWindowText(connect_url, Preferences::connect_url_data);
 		uGetWindowText(username, Preferences::username_data);
 		uGetWindowText(password, Preferences::password_data);
@@ -243,7 +243,7 @@ public:
 		on_change_callback->on_state_changed();
 	}
 
-	void reset() {
+	void reset() override {
 		uSetWindowText(connect_url, "");
 		uSetWindowText(username, "");
 		uSetWindowText(password, "");
@@ -295,23 +295,23 @@ public:
 	}
 
 	LRESULT OnNMClickLnkHelp(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/) {
-		ShellExecute(0, L"open", L"https://github.com/hypfvieh/foo_subsonic/wiki", NULL, NULL, SW_SHOW);
+		ShellExecute(0, L"open", L"https://github.com/hypfvieh/foo_subsonic/wiki", nullptr, nullptr, SW_SHOW);
 		return 0;
 	}
 };
 
 class PreferencesPage : public preferences_page_impl<PreferencesPageInstance> {
 public:
-	const char * get_name() {
+	const char * get_name() override {
 		return COMPONENT_TITLE;
 	}
 
-	GUID get_guid() {
+	GUID get_guid() override {
 		static const GUID guid = { 0x6829a87b, 0xd15f, 0x4ee7,{ 0xb7, 0xa, 0xe9, 0x6a, 0xfe, 0xd4, 0x2d, 0xd7 } };
 		return guid;
 	}
 
-	GUID get_parent_guid() {
+	GUID get_parent_guid() override {
 		return preferences_page::guid_media_library;
 	}
 };

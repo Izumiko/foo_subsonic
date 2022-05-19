@@ -28,8 +28,6 @@ public:
 		size("0"),
 		tracknumber("0") {}
 
-	~Track() {
-
-	}
+	~Track() = default;
 
 };

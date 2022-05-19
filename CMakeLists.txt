@@ -101,6 +101,7 @@ file(GLOB FOO_SUBSONIC_SRC "./*.cpp")
 add_library(foo_subsonic SHARED ${FOO_SUBSONIC_SRC} "foo_subsonic.rc")
 
 target_include_directories(foo_subsonic PRIVATE "." "${SDK_ROOT_DIR}" "${SQLITE_DIR}" "SDK/wtl/Include" "${FB2K_SDK_helpers_DIR}")
+target_precompile_headers(foo_subsonic PRIVATE "./stdafx.h")
 target_link_directories(foo_subsonic PRIVATE "${SDK_ROOT_DIR}/foobar2000/shared")
 target_link_libraries(foo_subsonic
         foobar2000_sdk

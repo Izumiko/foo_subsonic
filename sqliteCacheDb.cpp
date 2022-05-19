@@ -4,7 +4,7 @@
 #include <regex>
 #include <sstream>
 
-SqliteCacheDb* SqliteCacheDb::instance = NULL;
+SqliteCacheDb* SqliteCacheDb::instance = nullptr;
 
 
 SqliteCacheDb::SqliteCacheDb() {
@@ -19,7 +19,7 @@ void SqliteCacheDb::loadOrCreateDb() {
 	
 	db = new SQLite::Database(userDir.c_str(), SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 	
-	if (db != NULL) {
+	if (db != nullptr) {
 		createTableStructure();
 		getAllAlbumsFromCache();
 		getAllPlaylistsFromCache();
@@ -28,27 +28,29 @@ void SqliteCacheDb::loadOrCreateDb() {
 }
 
 void SqliteCacheDb::createTableStructure() {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
-	for (unsigned int i = 0; i < SQL_TABLE_CREATE_SIZE; i++) {
+	for (auto & sql : sql_table_create) {
 		try {
-			db->exec(sql_table_create[i]);
+			db->exec(sql);
 		}
 		catch (...) {
-			uDebugLog() << "Unable to create table: " << sql_table_create[i];
+#ifdef _DEBUG
+			FB2K_DebugLog() << "Unable to create table: " << sql;
+#endif
 		}
 	}
 }
 
 SqliteCacheDb::~SqliteCacheDb() {
-	if (db != NULL) {
+	if (db != nullptr) {
 		db->exec("VACUUM;"); // restructure cache, maybe we have to free some space
 		db->~Database();
 	}
 }
 
 void SqliteCacheDb::reloadCache() {
-	if (db != NULL) {
+	if (db != nullptr) {
 		db->exec("VACUUM;"); // restructure cache, maybe we have to free some space
 		db->~Database();
 	}
@@ -120,7 +122,7 @@ bool SqliteCacheDb::getTrackDetailsByUrl(const char* url, Track &t) {
 	}
 
 	if (urlToTrackMap.count(result) > 0) { // fast way
-		std::map<std::string, Track*>::iterator i = urlToTrackMap.find(result);
+		auto i = urlToTrackMap.find(result);
 		t = *i->second;
 		return TRUE;
 	}
@@ -131,9 +133,9 @@ bool SqliteCacheDb::getTrackDetailsByUrl(const char* url, Track &t) {
 			std::list<Track*>* trackList = it->getTracks();
 			std::list<Track*>::iterator trackIterator;
 			for (trackIterator = trackList->begin(); trackIterator != trackList->end(); trackIterator++) {
-
-				uDebugLog() << "Comparing: T->ID: '" << (*trackIterator)->get_id() << "' --- Given ID: '" << result.c_str() << "'";
-
+#ifdef _DEBUG
+				FB2K_DebugLog() << "Comparing: T->ID: '" << (*trackIterator)->get_id() << "' --- Given ID: '" << result.c_str() << "'";
+#endif
 				if (strcmp((*trackIterator)->get_id().c_str(), result.c_str()) == 0) {
 					t = **trackIterator;
 					return TRUE;
@@ -154,7 +156,7 @@ void SqliteCacheDb::getAlbumById(const char* id, Album &a) {
 }
 
 void SqliteCacheDb::savePlaylists(threaded_process_status &p_status, abort_callback &p_abort) {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 	std::list<Playlist>::iterator it;
 
 	unsigned int prg = 0;
@@ -223,7 +225,9 @@ void SqliteCacheDb::savePlaylists(threaded_process_status &p_status, abort_callb
 				query_track.bind(13, t->get_artistId());
 
 				if (query_track.exec() != 1) {
-					uDebugLog() << "Error while inserting track";
+#ifdef _DEBUG
+					FB2K_DebugLog() << "Error while inserting track";
+#endif
 				}
 
 			}
@@ -236,7 +240,7 @@ void SqliteCacheDb::savePlaylists(threaded_process_status &p_status, abort_callb
 }
 
 void SqliteCacheDb::saveAlbums(threaded_process_status &p_status, abort_callback &p_abort) {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 	std::list<Album>::iterator it;
 
 	unsigned int prg = 0;
@@ -265,11 +269,11 @@ void SqliteCacheDb::saveAlbums(threaded_process_status &p_status, abort_callback
 		query.bind(4, it->get_genre());
 		query.bind(5, it->get_year());
 		query.bind(6, it->get_coverArt());
-		query.bind(7, it->get_duration());
+		query.bind(7, (int32_t)it->get_duration());
 		query.bind(8, it->get_songCount());
-
-		uDebugLog() << "Writing cache data for: " << it->get_artist() << " -- " << it->get_title();
-
+#ifdef _DEBUG
+		FB2K_DebugLog() << "Writing cache data for: " << it->get_artist() << " -- " << it->get_title();
+#endif
 		// adding the tracks requires some extra work to speed up the writing of sqlite.
 		// doing all INSERTs seperately is incredibly slow, so we try some sort of batch processing here
 		if (query.exec() >= 1) {
@@ -375,7 +379,9 @@ void SqliteCacheDb::saveAlbums(threaded_process_status &p_status, abort_callback
 
 					query_track.exec();
 					if (query_track.getErrorCode() != SQLITE_DONE) {
-						uDebugLog() << "Error while inserting track ErrCode: " << query_track.getErrorCode() << " -- ExtErrCode: " << query_track.getExtendedErrorCode();
+#ifdef _DEBUG
+						FB2K_DebugLog() << "Error while inserting track ErrCode: " << query_track.getErrorCode() << " -- ExtErrCode: " << query_track.getExtendedErrorCode();
+#endif
 					}
 					query_track.reset();
 				}
@@ -413,7 +419,7 @@ void SqliteCacheDb::parseTrackInfo(Track *t, SQLite::Statement *query_track) {
 }
 
 void SqliteCacheDb::getAllAlbumsFromCache() {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 	// get all albums assigned to the artist and sorted by album name
 	SQLite::Statement query(*db, "SELECT albums.id, artists.artist, title, genre, year, coverArt, duration, songCount, artistId FROM albums, artists WHERE albums.artistId = artists.id ORDER BY artists.artist ASC, title ASC");
 
@@ -434,7 +440,7 @@ void SqliteCacheDb::getAllAlbumsFromCache() {
 		query_track.bind(1, a.get_id());
 
 		while (query_track.executeStep()) {
-			Track* t = new Track();
+			auto* t = new Track();
 			parseTrackInfo(t, &query_track);
 			t->set_artist(a.get_artist());
 			t->set_album(a.get_title());
@@ -449,7 +455,7 @@ void SqliteCacheDb::getAllAlbumsFromCache() {
 }
 
 void SqliteCacheDb::getAllPlaylistsFromCache() {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 	SQLite::Statement query(*db, "SELECT id, comment, duration, coverArt, public, name, owner, songCount FROM playlists");
 
 	while (query.executeStep()) {
@@ -476,7 +482,7 @@ void SqliteCacheDb::getAllPlaylistsFromCache() {
 			query_track.bind(1, trackId);
 
 			while (query_track.executeStep()) {
-				Track* t = new Track();
+				auto* t = new Track();
 				parseTrackInfo(t, &query_track);
 
 				SQLite::Statement query_artist(*db, "SELECT artist FROM artists WHERE id = ?1 LIMIT 1");
@@ -494,9 +500,9 @@ void SqliteCacheDb::getAllPlaylistsFromCache() {
 }
 
 void SqliteCacheDb::addCoverArtToCache(const char* coverArtId, const void * coverArtData, unsigned int dataLength) {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
-	if (dataLength > 0 && coverArtId != NULL && strlen(coverArtId) > 0) {
+	if (dataLength > 0 && coverArtId != nullptr && strlen(coverArtId) > 0) {
 		SQLite::Transaction transaction(*db);
 		SQLite::Statement query_coverArt(*db, "INSERT OR REPLACE INTO coverart (id, coverArtData) VALUES (?1, ?2)");
 
@@ -504,14 +510,16 @@ void SqliteCacheDb::addCoverArtToCache(const char* coverArtId, const void * cove
 		query_coverArt.bind(2, coverArtData, dataLength);
 
 		if (query_coverArt.exec() < 1) {
-			uDebugLog() << "Error inserting coverArtData";
+#ifdef _DEBUG
+			FB2K_DebugLog() << "Error inserting coverArtData";
+#endif
 		}
 		transaction.commit();
 	}
 }
 
 void SqliteCacheDb::getCoverArtById(const char* coverArtId, char* &coverArtData, unsigned int &dataLength) {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
 	SQLite::Statement query_coverArt(*db, "SELECT coverArtData FROM coverart WHERE id = ?1 LIMIT 1");
 	dataLength = 0;
@@ -530,7 +538,7 @@ void SqliteCacheDb::getCoverArtById(const char* coverArtId, char* &coverArtData,
 }
 
 void SqliteCacheDb::getCoverArtByTrackId(const char* trackId, std::string &out_coverId, char* &coverArtData, unsigned int &dataLength) {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
 	SQLite::Statement query_coverId(*db, "SELECT coverArt FROM tracks WHERE id = ?1 LIMIT 1");
 
@@ -545,7 +553,7 @@ void SqliteCacheDb::getCoverArtByTrackId(const char* trackId, std::string &out_c
 
 
 void SqliteCacheDb::clearCoverArtCache() {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
 	db->exec("DROP TABLE coverart;");
 	db->exec("VACUUM;");
@@ -553,7 +561,7 @@ void SqliteCacheDb::clearCoverArtCache() {
 }
 
 void SqliteCacheDb::clearCache() {
-	if (db == NULL) return;
+	if (db == nullptr) return;
 
 	SQLite::Transaction transaction(*db);
 	db->exec("DROP TABLE coverart;");
@@ -573,7 +581,7 @@ void SqliteCacheDb::clearCache() {
 	urlToTrackMap.clear();
 }
 
-void SqliteCacheDb::checkMetaInfo() {
+[[maybe_unused]] void SqliteCacheDb::checkMetaInfo() {
 	SQLite::Statement query(*db, "SELECT * FROM metainfo");
 
 	while (query.executeStep()) {
@@ -583,9 +591,9 @@ void SqliteCacheDb::checkMetaInfo() {
 			if (isInteger(val)) {
 				int valInt = atoi(val.c_str());
 				if (valInt != SQL_TABLE_VERSION) {
-					MessageBox(NULL, L"Your local subsonic cache database is not compatible with the current plugin version.\r\nThe old database will be removed and you have to re-query your catalog/playlists!", L"Cache outdated", MB_OK | MB_ICONINFORMATION);
+					MessageBox(nullptr, L"Your local subsonic cache database is not compatible with the current plugin version.\r\nThe old database will be removed and you have to re-query your catalog/playlists!", L"Cache outdated", MB_OK | MB_ICONINFORMATION);
 					
-					if (db != NULL) {
+					if (db != nullptr) {
 						std::wstring dbFile = s2ws(db->getFilename());						
 						db->~Database(); // destory handle
 						DeleteFile(dbFile.c_str());

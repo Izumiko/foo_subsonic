@@ -38,7 +38,7 @@ namespace listviewHelper {
 		else return (unsigned)ret;
 	}
 
-	unsigned insert_item2(HWND p_listview, unsigned p_index, const char * col0, const char * col1, LPARAM p_param) {
+    [[maybe_unused]] unsigned insert_item2(HWND p_listview, unsigned p_index, const char * col0, const char * col1, LPARAM p_param) {
 		unsigned i = insert_item(p_listview, p_index, col0, p_param);
 		if (i != ~0) {
 			set_item_text(p_listview, i, 1, col1);
@@ -46,7 +46,7 @@ namespace listviewHelper {
 		return i;
 	}
 
-	unsigned insert_item3(HWND p_listview, unsigned p_index, const char * col0, const char * col1, const char * col2, LPARAM p_param) {
+    [[maybe_unused]] unsigned insert_item3(HWND p_listview, unsigned p_index, const char * col0, const char * col1, const char * col2, LPARAM p_param) {
 		unsigned i = insert_item(p_listview, p_index, col0, p_param);
 		if (i != ~0) {
 			set_item_text(p_listview, i, 1, col1);
@@ -84,30 +84,30 @@ namespace listviewHelper {
 		else return (unsigned)ret;
 	}
 
-	void get_item_text(HWND p_listview, unsigned p_index, unsigned p_column, pfc::string_base & p_out) {
+    [[maybe_unused]] void get_item_text(HWND p_listview, unsigned p_index, unsigned p_column, pfc::string_base & p_out) {
 		enum { buffer_length = 1024 * 64 };
 		pfc::array_t<TCHAR> buffer; buffer.set_size(buffer_length);
-		ListView_GetItemText(p_listview, p_index, p_column, buffer.get_ptr(), buffer_length);
+		ListView_GetItemText(p_listview, p_index, p_column, buffer.get_ptr(), buffer_length)
 		p_out = pfc::stringcvt::string_utf8_from_os(buffer.get_ptr(), buffer_length);
-	}	
+	}
 
-	bool is_item_selected(HWND p_listview, unsigned p_index)
+    [[maybe_unused]] bool is_item_selected(HWND p_listview, unsigned p_index)
 	{
 		LVITEM item = {};
 		item.mask = LVIF_STATE;
 		item.iItem = p_index;
 		item.stateMask = LVIS_SELECTED;
 		if (!uSendMessage(p_listview, LVM_GETITEM, 0, (LPARAM)&item)) return false;
-		return (item.state & LVIS_SELECTED) ? true : false;
+		return (item.state & LVIS_SELECTED) != 0;
 	}
 
-	void set_item_selection(HWND p_listview, unsigned p_index, bool p_state)
+    [[maybe_unused]] void set_item_selection(HWND p_listview, unsigned p_index, bool p_state)
 	{
 		PFC_ASSERT(::IsWindow(p_listview));
 		LVITEM item = {};
 		item.stateMask = LVIS_SELECTED;
 		item.state = p_state ? LVIS_SELECTED : 0;
-		WIN32_OP_D(SendMessage(p_listview, LVM_SETITEMSTATE, (WPARAM)p_index, (LPARAM)&item));
+		WIN32_OP_D(SendMessage(p_listview, LVM_SETITEMSTATE, (WPARAM)p_index, (LPARAM)&item))
 	}
 
 	bool ensure_visible(HWND p_listview, unsigned p_index)
@@ -115,15 +115,15 @@ namespace listviewHelper {
 		return uSendMessage(p_listview, LVM_ENSUREVISIBLE, p_index, FALSE) ? true : false;
 	}
 
-	bool select_single_item(HWND p_listview, unsigned p_index)
+    [[maybe_unused]] bool select_single_item(HWND p_listview, unsigned p_index)
 	{
 		LRESULT temp = SendMessage(p_listview, LVM_GETITEMCOUNT, 0, 0);
 		if (temp < 0) return false;
 		ListView_SetSelectionMark(p_listview, p_index);
-		unsigned n; const unsigned m = pfc::downcast_guarded<unsigned>(temp);
+		unsigned n; const auto m = pfc::downcast_guarded<unsigned>(temp);
 		for (n = 0; n<m; n++) {
 			enum { mask = LVIS_FOCUSED | LVIS_SELECTED };
-			ListView_SetItemState(p_listview, n, n == p_index ? mask : 0, mask);
+			ListView_SetItemState(p_listview, n, n == p_index ? mask : 0, mask)
 		}
 		return ensure_visible(p_listview, p_index);
 	}

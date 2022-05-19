@@ -8,12 +8,12 @@ namespace foo_subsonic {
 	{
 	public:
 		ArtistUpdateThread(SubsonicLibraryScanner *scanner, HWND window, pfc::string8 _artistId);
-		void run(threaded_process_status &p_status, abort_callback &p_abort);
+		void run(threaded_process_status &p_status, abort_callback &p_abort) override;
 
 	private:
 		pfc::string8 artistId;
 		HWND window;
 		SubsonicLibraryScanner* scanner;
-		pfc::list_t<metadb_handle_ptr> *tracks;
+		pfc::list_t<metadb_handle_ptr> *tracks{};
 	};
 }

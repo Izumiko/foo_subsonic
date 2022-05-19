@@ -17,4 +17,4 @@ public:
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(FakeAlbumArtExtractor);
 };
 
-static service_factory_t<FakeAlbumArtExtractor> g_fake_album_art_fallback_factory;
+[[maybe_unused]] static service_factory_t<FakeAlbumArtExtractor> g_fake_album_art_fallback_factory;

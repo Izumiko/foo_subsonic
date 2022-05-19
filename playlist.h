@@ -17,7 +17,7 @@ public:
 		albumTracks.push_back(t);
 	}
 
-	void addTracks(std::list<Track> list) {
+    [[maybe_unused]] void addTracks(std::list<Track> list) {
 		std::list<Track>::iterator trackIterator;
 		for (trackIterator = list.begin(); trackIterator != list.end(); trackIterator++) {
 			Track t = *trackIterator;
@@ -36,9 +36,7 @@ public:
 		isPublic(FALSE)
 		{}
 
-	~Playlist() {
-
-	}
+	~Playlist() = default;
 private:
 	std::list<Track*> albumTracks;
 

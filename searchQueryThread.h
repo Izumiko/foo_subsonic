@@ -8,13 +8,13 @@ namespace foo_subsonic {
 	{
 	public:
 		SearchQueryThread(SubsonicLibraryScanner *scanner, HWND window, const char* queryString);
-		void run(threaded_process_status &p_status, abort_callback &p_abort);
+		void run(threaded_process_status &p_status, abort_callback &p_abort) override;
 
 	private:
 		HWND window;		
 		SubsonicLibraryScanner* scanner;
 		const char* queryString;
-		Album* results;
-		pfc::list_t<metadb_handle_ptr> *tracks;
+		Album* results{};
+		pfc::list_t<metadb_handle_ptr> *tracks{};
 	};
 }

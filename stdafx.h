@@ -1,1 +1,1 @@
-#include "../ATLHelpers/ATLHelpers.h"
+#include "foobar2000+atl.h"

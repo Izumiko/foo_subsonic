@@ -3,6 +3,8 @@
 #include "foo_subsonic.h"
 #include <winhttp.h>
 
+#include <utility>
+
 
 #define PROXY_OFF 0
 #define PROXY_SYSTEM 1
@@ -79,25 +81,25 @@ private:
 class SimpleHttpClient {
 
 public:
-	SimpleHttpClient(SimpleHttpClientConfig config) {
-		m_client_config = config;
+	explicit SimpleHttpClient(SimpleHttpClientConfig config) {
+		m_client_config = std::move(config);
 	}
 
 	~SimpleHttpClient() {
-		if (m_request_handle != NULL) WinHttpCloseHandle(m_request_handle);
-		if (m_hSession != NULL) WinHttpCloseHandle(m_hSession);
-		if (m_hConnection != NULL) WinHttpCloseHandle(m_hConnection);		
+		if (m_request_handle != nullptr) WinHttpCloseHandle(m_request_handle);
+		if (m_hSession != nullptr) WinHttpCloseHandle(m_hSession);
+		if (m_hConnection != nullptr) WinHttpCloseHandle(m_hConnection);
 	};
 
 	/*
 		Open connection to server.
 		Use paramUrl to add parameters to the previously defined URL.
 	*/
-	unsigned long SimpleHttpClient::open(pfc::string8 paramUrl)
+	unsigned long open(const pfc::string8& paramUrl)
 	{
 		DWORD access_type;
 		LPCWSTR proxy_name;
-		SimpleHttpClientUrl* url = new SimpleHttpClientUrl;
+		auto* url = new SimpleHttpClientUrl;
 		strToSimpleHttpClientUrl(paramUrl, url);
 
 		m_url = url;
@@ -129,7 +131,7 @@ public:
 
 		// Open session.
 		m_hSession = WinHttpOpen(
-			NULL,
+			nullptr,
 			access_type,
 			proxy_name,
 			WINHTTP_NO_PROXY_BYPASS,
@@ -189,8 +191,8 @@ public:
 	/*
 		Converts a given URL to a SimpleHttpClientUrl by parsing different information from the original string.
 	*/
-	void SimpleHttpClient::strToSimpleHttpClientUrl(pfc::string8 strUrl, SimpleHttpClientUrl* simpleUrl) {
-		pfc::string workstr = strUrl;
+	static void strToSimpleHttpClientUrl(const pfc::string8& strUrl, SimpleHttpClientUrl* simpleUrl) {
+		const pfc::string& workstr = strUrl;
 
 		pfc::string workstr_lower = workstr.toLower();
 
@@ -223,7 +225,7 @@ public:
 					simpleUrl->httpPort = iport;
 				}
 				else { // if port not in range, we ignore it
-					console::formatter() << "The specified port '" << port.c_str() << "' is either not numeric or out of range (1-65535)";
+					FB2K_console_formatter() << "The specified port '" << port.c_str() << "' is either not numeric or out of range (1-65535)";
 				}
 			}
 
@@ -267,7 +269,7 @@ public:
 		If the third option is configured, I take the string found from the IE proxy settings and use this unmodified, assuming that the syntax returned by
 		WinHttpGetIEProxyConfigForCurrentUser is valid for WINHTTP as well (which seems to be the case in my testings).
 	*/
-	bool SimpleHttpClient::proxyRequired(HINTERNET session, WINHTTP_PROXY_INFO* info) {
+	bool proxyRequired(HINTERNET session, WINHTTP_PROXY_INFO* info) {
 		WINHTTP_AUTOPROXY_OPTIONS autoproxy_options;
 		memset(&autoproxy_options, 0, sizeof(WINHTTP_AUTOPROXY_OPTIONS));
 
@@ -278,11 +280,11 @@ public:
 		WinHttpGetIEProxyConfigForCurrentUser(&pIEProxyConfig);
 
 		if (!pIEProxyConfig.fAutoDetect) { // autodetection is disabled, maybe another proxy setup
-			if (pIEProxyConfig.lpszAutoConfigUrl != NULL && wcslen(pIEProxyConfig.lpszAutoConfigUrl) > 0) { // proxy config url (proxy pac) found
+			if (pIEProxyConfig.lpszAutoConfigUrl != nullptr && wcslen(pIEProxyConfig.lpszAutoConfigUrl) > 0) { // proxy config url (proxy pac) found
 				autoproxy_options.dwFlags = WINHTTP_AUTOPROXY_CONFIG_URL;
 				autoproxy_options.lpszAutoConfigUrl = pIEProxyConfig.lpszAutoConfigUrl;
 			}
-			else if (pIEProxyConfig.lpszProxy != NULL && wcslen(pIEProxyConfig.lpszProxy) > 0) { // manual proxy config
+			else if (pIEProxyConfig.lpszProxy != nullptr && wcslen(pIEProxyConfig.lpszProxy) > 0) { // manual proxy config
 				info->lpszProxy = pIEProxyConfig.lpszProxy;
 				info->dwAccessType = WINHTTP_ACCESS_TYPE_NAMED_PROXY;
 				// proxy is configured manually, so we dont need to query WinHttpGetProxyForUrl, we can just return the static configuration
@@ -301,7 +303,7 @@ public:
 			&autoproxy_options,
 			info);
 
-		return result ? true : false;
+		return result != 0;
 	}
 
 
@@ -310,7 +312,7 @@ public:
 	/*
 		Send the request to the server and return the response in &responsebuffer.
 	*/
-	void SimpleHttpClient::send_request(char* &responsebuffer, size_t &buffSize) {
+	void send_request(char* &responsebuffer, size_t &buffSize) {
 
 		WINHTTP_PROXY_INFO info;
 		memset(&info, 0, sizeof(WINHTTP_PROXY_INFO));
@@ -379,7 +381,7 @@ public:
 		}
   
 		unsigned long size;
-		if (!WinHttpReceiveResponse(m_request_handle, NULL) || !WinHttpQueryDataAvailable(m_request_handle, &size)) {
+		if (!WinHttpReceiveResponse(m_request_handle, nullptr) || !WinHttpQueryDataAvailable(m_request_handle, &size)) {
 			report_failure_debug("Receiving Response");
 			return;
 		}
@@ -394,7 +396,7 @@ public:
 
 		if (dwStatusCode == 404 || dwStatusCode == 401 || dwStatusCode == 503) {
 			char foo[50];
-			snprintf(foo, 100, "%s: %d", "Unable to retrieve data, HTTP Error", dwStatusCode);
+			snprintf(foo, 50, "%s: %lu", "Unable to retrieve data, HTTP Error", dwStatusCode);
 			report_failure(LOG_LEVEL_FATAL, foo);
 		}
 
@@ -404,7 +406,7 @@ public:
 			WinHttpReadData(m_request_handle, tmp, size, &downloaded);
 			//responsebuffer.add_string(tmp, downloaded);
 
-			if (responsebuffer == NULL) {
+			if (responsebuffer == nullptr) {
 				responsebuffer = new char[downloaded];
 				memcpy(responsebuffer, tmp, downloaded);
 				buffSize = downloaded;
@@ -422,8 +424,7 @@ public:
 			delete[] tmp;
 			WinHttpQueryDataAvailable(m_request_handle, &size);
 
-		};
-		return;
+		}
 	}
 
 	
@@ -433,32 +434,32 @@ private:
 
 	SimpleHttpClientConfig m_client_config;
 
-	HINTERNET m_hSession = NULL;
-	HINTERNET m_hConnection = NULL;
-	HINTERNET m_request_handle = NULL;
+	HINTERNET m_hSession = nullptr;
+	HINTERNET m_hConnection = nullptr;
+	HINTERNET m_request_handle = nullptr;
 
-	SimpleHttpClientUrl* m_url;
+	SimpleHttpClientUrl* m_url{};
 
-	const SimpleHttpClientConfig& client_config() const
+	[[nodiscard]] const SimpleHttpClientConfig& client_config() const
 	{
 		return m_client_config;
 	}
-	unsigned long report_failure(int lvl, const char* errorMessage)
+	static unsigned long report_failure(int lvl, const char* errorMessage)
 	{
 		DWORD err = GetLastError();
 		console::printf("SimpleHttpClient [ERR] (%i): %s", err, errorMessage);
 
 		if (lvl == LOG_LEVEL_ERROR) {
-			MessageBoxA(NULL, errorMessage, "Error while connecting", MB_OK | MB_ICONERROR);
+			MessageBoxA(nullptr, errorMessage, "Error while connecting", MB_OK | MB_ICONERROR);
 		}
 		else if (lvl == LOG_LEVEL_FATAL) {
-			MessageBoxA(NULL, errorMessage, "FATAL ERROR while connecting", MB_OK | MB_ICONERROR);
+			MessageBoxA(nullptr, errorMessage, "FATAL ERROR while connecting", MB_OK | MB_ICONERROR);
 		}
 
 		return err;
 	}
 
-	unsigned long report_failure_debug(const char* errorMessage) {
+	static unsigned long report_failure_debug(const char* errorMessage) {
 		return report_failure(LOG_LEVEL_DEBUG, errorMessage);
 	}
 };

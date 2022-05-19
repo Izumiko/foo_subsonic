@@ -42,7 +42,7 @@ public:
 	};
 
 	SearchDialog(COLORREF fgcolor, COLORREF bgcolor) {
-		m_haccelerator = NULL;
+		m_haccelerator = nullptr;
 		fgColor = fgcolor;
 		bgColor = bgcolor;
 		Create(core_api::get_main_window());
@@ -129,20 +129,20 @@ public:
 		{
 			if (nItem > -1) {
 				DWORD_PTR ptr = results.GetItemData(nItem);
-				CoreEntity* coreType = reinterpret_cast<CoreEntity*>(ptr);
+				auto* coreType = reinterpret_cast<CoreEntity*>(ptr);
 				if (coreType->get_type() == ENTRY_TYPE_TRACK) { // Track
 					if (ptr != NULL) {
-						Track* track = reinterpret_cast<Track*>(ptr);
-
-						uDebugLog() << "Got Track=" << track->get_title() << ", Artist=" << track->get_artist();
-
+						auto* track = reinterpret_cast<Track*>(ptr);
+#ifdef _DEBUG
+						FB2K_DebugLog() << "Got Track=" << track->get_title() << ", Artist=" << track->get_artist();
+#endif
 						const char* url = track->get_streamUrl().c_str();
 
 						static_api_ptr_t<playlist_incoming_item_filter_v2>()->process_locations_async(
 							pfc::list_single_ref_t<const char*>(url),
 							playlist_incoming_item_filter_v2::op_flag_background,
-							NULL,
-							NULL,
+							nullptr,
+							nullptr,
 							m_hWnd,
 							p_notify
 							);

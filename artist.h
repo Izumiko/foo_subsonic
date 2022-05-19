@@ -7,12 +7,11 @@ class Artist : public CoreEntity {
 
 public:
 
-	Artist(pfc::string8 _id) : CoreEntity(ENTRY_TYPE_ARTIST) {
+	explicit Artist(pfc::string8 _id) : CoreEntity(ENTRY_TYPE_ARTIST) {
 		set_id(_id);
 	};
 
-	~Artist() {
-	}
+	~Artist() = default;
 
 };
 
