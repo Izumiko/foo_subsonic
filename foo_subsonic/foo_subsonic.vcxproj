@@ -63,7 +63,8 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsWinRT>false</CompileAsWinRT>
-      <AdditionalIncludeDirectories>$(ProjectDir)SDK;$(ProjectDir)SDK\sqlite3;$(ProjectDir)SDK/wtl/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\sqlite3;$(ProjectDir)..\wtl\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -72,8 +73,8 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>sqlite3.lib;tinyxml.lib;foobar2000_component_client.lib;libPPUI.lib;pfc.lib;foobar2000_SDK.lib;foobar2000_sdk_helpers.lib;shared.lib;Winhttp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)$(Configuration);$(ProjectDir)$(Configuration)tinyxml;$(ProjectDir)SDK\foobar2000\foobar2000_component_client\$(Configuration);$(ProjectDir)SDK\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;tinyxml.lib;foobar2000_component_client.lib;libPPUI.lib;pfc.lib;foobar2000_SDK.lib;foobar2000_sdk_helpers.lib;shared-Win32.lib;Winhttp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\$(Configuration);$(ProjectDir)..\$(Configuration)tinyxml;$(ProjectDir)..\foobar2000\foobar2000_component_client\$(Configuration);$(ProjectDir)..\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -86,7 +87,8 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>$(ProjectDir)SDK;$(ProjectDir)SDK\sqlite3;$(ProjectDir)SDK/wtl/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\sqlite3;$(ProjectDir)..\wtl\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -97,8 +99,8 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>sqlite3.lib;tinyxml.lib;foobar2000_component_client.lib;libPPUI.lib;pfc.lib;foobar2000_SDK.lib;foobar2000_sdk_helpers.lib;shared.lib;Winhttp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)$(Configuration);$(ProjectDir)$(Configuration)tinyxml;$(ProjectDir)SDK\foobar2000\foobar2000_component_client\$(Configuration);$(ProjectDir)SDK\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;tinyxml.lib;foobar2000_component_client.lib;libPPUI.lib;pfc.lib;foobar2000_SDK.lib;foobar2000_sdk_helpers.lib;shared-Win32.lib;Winhttp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\$(Configuration);$(ProjectDir)..\$(Configuration)tinyxml;$(ProjectDir)..\foobar2000\foobar2000_component_client\$(Configuration);$(ProjectDir)..\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -151,28 +153,28 @@
     <ClInclude Include="xmlhelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="SDK\pfc\pfc.vcxproj">
+    <ProjectReference Include="..\pfc\pfc.vcxproj">
       <Project>{ebfffb4e-261d-44d3-b89c-957b31a0bf9c}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\tinyxml\tinyxml_lib.vcxproj">
+    <ProjectReference Include="..\tinyxml\tinyxml_lib.vcxproj">
       <Project>{c406daec-0886-4771-8dea-9d7329b46cc1}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
+    <ProjectReference Include="..\foobar2000\foobar2000_component_client\foobar2000_component_client.vcxproj">
       <Project>{71ad2674-065b-48f5-b8b0-e1f9d3892081}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\foobar2000\helpers\foobar2000_sdk_helpers.vcxproj">
+    <ProjectReference Include="..\foobar2000\helpers\foobar2000_sdk_helpers.vcxproj">
       <Project>{ee47764e-a202-4f85-a767-abdab4aff35f}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\foobar2000\SDK\foobar2000_SDK.vcxproj">
+    <ProjectReference Include="..\foobar2000\SDK\foobar2000_SDK.vcxproj">
       <Project>{e8091321-d79d-4575-86ef-064ea1a4a20d}</Project>
     </ProjectReference>
-    <ProjectReference Include="sqlite3\sqlite3.vcxproj">
+    <ProjectReference Include="..\sqlite3\sqlite3.vcxproj">
       <Project>{FB1E9702-8627-4AF6-AB9E-BB52729D112F}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\libPPUI\libPPUI.vcxproj">
+    <ProjectReference Include="..\libPPUI\libPPUI.vcxproj">
       <Project>{7729EB82-4069-4414-964B-AD399091A03F}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDK\tinyxml\tinyxml_lib.vcxproj">
+    <ProjectReference Include="..\tinyxml\tinyxml_lib.vcxproj">
       <Project>{C406DAEC-0886-4771-8DEA-9D7329B46CC1}</Project>
     </ProjectReference>
   </ItemGroup>

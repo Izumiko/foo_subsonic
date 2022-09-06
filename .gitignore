@@ -7,6 +7,8 @@ ipch/*
 x64/*
 Release/
 Releasetinyxml/
+Debug/
+Debugtinyxml/
 sqlite3/Release/
 sqlite3/Debug/
 sqlite3/*.c
@@ -16,3 +18,9 @@ sqlite3/SQLiteCpp/*.h
 build/
 .idea/
 cmake-*
+/foobar2000
+/libPPUI
+/pfc
+sdk-license.txt
+sdk-readme.html
+sdk-readme.css

@@ -49,8 +49,8 @@ public:
 
 	void OnOk(UINT uNotifyCode, int nID, CWindow wndCtl) {
 		if (nID == IDOK) {
-			Preferences::username_data = string_utf8_from_window(m_hWnd, IDC_TXT_USERNAME);
-			Preferences::password_data = string_utf8_from_window(m_hWnd, IDC_TXT_PASSWORD);
+			Preferences::username_data = uGetDlgItemText(m_hWnd, IDC_TXT_USERNAME);
+			Preferences::password_data = uGetDlgItemText(m_hWnd, IDC_TXT_PASSWORD);
 		}
 		//CDialogImpl::DestroyWindow();
 		EndDialog(0);

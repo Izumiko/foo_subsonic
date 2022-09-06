@@ -97,8 +97,8 @@ public:
 	void OnOk(UINT uNotifyCode, int nID, CWindow wndCtl) {
 		if (nID == IDOK) {
 
-			pfc::string8 params = SimpleHttpClientConfigurator::url_encode(string_utf8_from_window(m_hWnd, IDC_SEARCHTERM));
-			params << "&albumCount=0&artistCount=0&songCount=" << string_utf8_from_window(m_hWnd, IDC_CB_RESULT_COUNT);
+			pfc::string8 params = SimpleHttpClientConfigurator::url_encode(uGetDlgItemText(m_hWnd, IDC_SEARCHTERM));
+			params << "&albumCount=0&artistCount=0&songCount=" << uGetDlgItemText(m_hWnd, IDC_CB_RESULT_COUNT);
 			
 			threaded_process::g_run_modeless(new service_impl_t<foo_subsonic::SearchQueryThread>(&scanner, m_hWnd, params),
 				threaded_process::flag_show_progress | threaded_process::flag_show_abort, m_hWnd, "Searching Subsonic Server");

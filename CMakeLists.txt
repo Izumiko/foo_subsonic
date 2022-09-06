@@ -18,7 +18,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi /Oy /GS- /GL /we4715 /D_DEBUG")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/LTCG /INCREMENTAL:NO /OPT:REF")
 
 # directories
-set(SDK_ROOT_DIR "SDK")
+set(SDK_ROOT_DIR ".")
 set(FB2K_SDK_DIR "${SDK_ROOT_DIR}/foobar2000/SDK")
 set(FB2K_SDK_helpers_DIR "${SDK_ROOT_DIR}/foobar2000/helpers")
 set(FB2K_CLIENT_DIR "${SDK_ROOT_DIR}/foobar2000/foobar2000_component_client")
@@ -26,6 +26,7 @@ set(PFC_DIR "${SDK_ROOT_DIR}/pfc")
 set(PPUI_DIR "${SDK_ROOT_DIR}/libPPUI")
 set(TINYXML_DIR "${SDK_ROOT_DIR}/tinyxml")
 set(SQLITE_DIR "${SDK_ROOT_DIR}/sqlite3")
+set(SUBSONIC_DIR "./foo_subsonic")
 
 ##########################################################################
 # Foobar 2000 SDK
@@ -44,7 +45,7 @@ file(GLOB_RECURSE FB2K_SDK_helpers_SRC "${FB2K_SDK_helpers_DIR}/*.cpp")
 
 add_library(foobar2000_helpers STATIC ${FB2K_SDK_helpers_SRC})
 
-target_include_directories(foobar2000_helpers PRIVATE "${FB2K_SDK_helpers_DIR}/" "${SDK_ROOT_DIR}" "SDK/wtl/Include")
+target_include_directories(foobar2000_helpers PRIVATE "${FB2K_SDK_helpers_DIR}/" "${SDK_ROOT_DIR}" "${SDK_ROOT_DIR}/wtl/Include")
 target_precompile_headers(foobar2000_helpers PRIVATE "${FB2K_SDK_helpers_DIR}/stdafx.h")
 
 ##########################################################################
@@ -73,7 +74,7 @@ file(GLOB_RECURSE PPUI_SRC "${PPUI_DIR}/*.cpp")
 
 add_library(libPPUI STATIC ${PPUI_SRC})
 
-target_include_directories(libPPUI PRIVATE "${PPUI_DIR}/" "${SDK_ROOT_DIR}" "SDK/wtl/Include")
+target_include_directories(libPPUI PRIVATE "${PPUI_DIR}/" "${SDK_ROOT_DIR}" "${SDK_ROOT_DIR}/wtl/Include")
 target_precompile_headers(libPPUI PRIVATE "${PPUI_DIR}/stdafx.h")
 
 ##########################################################################
@@ -96,12 +97,12 @@ target_include_directories(sqlite3 PRIVATE "${SQLITE_DIR}")
 ##########################################################################
 # foo_subsonic
 ##########################################################################
-file(GLOB FOO_SUBSONIC_SRC "./*.cpp")
+file(GLOB FOO_SUBSONIC_SRC "${SUBSONIC_DIR}/*.cpp")
 
-add_library(foo_subsonic SHARED ${FOO_SUBSONIC_SRC} "foo_subsonic.rc")
+add_library(foo_subsonic SHARED ${FOO_SUBSONIC_SRC} "${SUBSONIC_DIR}/foo_subsonic.rc")
 
-target_include_directories(foo_subsonic PRIVATE "." "${SDK_ROOT_DIR}" "${SQLITE_DIR}" "SDK/wtl/Include" "${FB2K_SDK_helpers_DIR}")
-target_precompile_headers(foo_subsonic PRIVATE "./stdafx.h")
+target_include_directories(foo_subsonic PRIVATE "${SUBSONIC_DIR}" "${SDK_ROOT_DIR}" "${SQLITE_DIR}" "${SDK_ROOT_DIR}/wtl/Include" "${FB2K_SDK_helpers_DIR}")
+target_precompile_headers(foo_subsonic PRIVATE "${SUBSONIC_DIR}/stdafx.h")
 target_link_directories(foo_subsonic PRIVATE "${SDK_ROOT_DIR}/foobar2000/shared")
 target_link_libraries(foo_subsonic
         foobar2000_sdk
@@ -111,6 +112,6 @@ target_link_libraries(foo_subsonic
         libPPUI
         tinyxml
         sqlite3
-        shared
+        shared-Win32
         Winhttp
         )

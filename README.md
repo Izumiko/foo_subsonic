@@ -21,11 +21,11 @@ Please look at the specific project for further details.
 * MS Visual Studio (at least version 2010, I use 2022 Community Edition, 2022 SDK is for VS2019)
 
 ## Build Setup
-1. Extract Foobar2000 SDK to SDK folder
-2. Extract TinyXML source to SDK folder
-3. Extract WTL's Include folder to SDK/wtl/ folder
-4. Extract SQLite3 amalgamation source to SDK/sqlite3
-5. Extract SQLiteCPP and copy the *.cpp files to SDK/sqlite3. Then copy the files from includes/SQLiteCPP/*.h to SDK/sqlite3/SQLiteCPP
+1. Extract Foobar2000 SDK to root folder
+2. Extract TinyXML source to root folder
+3. Extract WTL's Include folder to wtl folder
+4. Extract SQLite3 amalgamation source to sqlite3
+5. Extract SQLiteCPP and copy the *.cpp files to sqlite3. Then copy the files from includes/SQLiteCPP/*.h to sqlite3/SQLiteCPP
 6. Start Visual Studio and open the foo_subsonic.sln
 7. Right click the solution in VS and Retarget solution, set target of all projects to your current VS and SDK
 8. Add IncludePath `../../wtl/Include` to foobar2000_sdk_helpers; add IncludePath `../wtl/Include` to libPPUI
@@ -33,15 +33,15 @@ Please look at the specific project for further details.
 Directory structure:
 ```
 foo_subsonic/
-    SDK/
-        foobar2000/
-        libPPUI
-        pfc/
-        sqlite3/
-            SQLiteCPP/
-        tinyxml/
-        wtl/
-            Include/
+    foo_subsonic/
+    foobar2000/
+    libPPUI
+    pfc/
+    sqlite3/
+        SQLiteCPP/
+    tinyxml/
+    wtl/
+        Include/
 ```
 
 Alternative build setup:
